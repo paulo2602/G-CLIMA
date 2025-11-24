@@ -1,4 +1,5 @@
 # Clima AI Platform
+<img width="1440" height="792" alt="Captura de Tela 2025-11-24 às 16 10 41" src="https://github.com/user-attachments/assets/68408d5b-dd0f-4776-ac9a-d4d9816d102a" />
 
 Uma plataforma completa de coleta, processamento e análise de dados climáticos em tempo real usando uma arquitetura de microsserviços orientada por eventos.
 
