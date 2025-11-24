@@ -416,15 +416,5 @@ curl http://localhost:3000/health
 - [ ] Mobile app (React Native)
 - [ ] GraphQL API alternative
 
-## Licença
 
-MIT © 2024 Clima AI Platform
-
-## Suporte
-
--  Email: support@clima.ai
--  Issues: [GitHub Issues](https://github.com/clima-ai/platform/issues)
--  Discussões: [GitHub Discussions](https://github.com/clima-ai/platform/discussions)
-
----
 
