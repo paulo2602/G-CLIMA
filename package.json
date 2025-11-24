@@ -1,0 +1,22 @@
+{
+  "name": "clima-ai-platform",
+  "version": "1.0.0",
+  "description": "Plataforma de coleta e análise de dados climáticos",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Escolha um comando:' && echo '  npm run api:dev      - Rodar API em desenvolvimento' && echo '  npm run frontend:dev - Rodar Frontend em desenvolvimento' && echo '  npm run collector:dev - Rodar Collector' && echo '  npm run worker:dev    - Rodar Worker' && echo '  npm run docker:up    - Iniciar todos os containers' && echo '  npm run docker:down  - Parar todos os containers'",
+    "api:dev": "cd api-nest && npm run start:dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "collector:dev": "cd collector-python && source venv/bin/activate && python app/main.py",
+    "worker:dev": "cd worker-go && go run main.go",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:ps": "docker-compose ps",
+    "build:all": "cd api-nest && npm run build && cd ../frontend && npm run build",
+    "install:all": "cd api-nest && npm install && cd ../frontend && npm install"
+  },
+  "keywords": ["climate", "weather", "data", "collection"],
+  "author": "Thiago Moreira",
+  "license": "MIT"
+}

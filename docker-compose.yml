@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: clima_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - clima-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: clima_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - clima-net
+
+  api:
+    build: ./api-nest
+    container_name: clima_api
+    restart: always
+    depends_on:
+      - mongo
+    env_file:
+      - ./api-nest/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - clima-net
+
+  collector:
+    build: ./collector-python
+    container_name: clima_collector
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - ./collector-python/.env
+    networks:
+      - clima-net
+
+  worker:
+    build: ./worker-go
+    container_name: clima_worker
+    restart: always
+    depends_on:
+      - rabbitmq
+      - api
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      API_BASE_URL: http://api:3000
+    networks:
+      - clima-net
+
+  frontend:
+    build: ./frontend
+    container_name: clima_frontend
+    restart: always
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    networks:
+      - clima-net
+
+networks:
+  clima-net:
+
+volumes:
+  mongo_data:
