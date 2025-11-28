@@ -1,15 +1,86 @@
-# Clima AI Platform
+# 🌤️ GDASH CLIMA - Plataforma de Análise Climática em Tempo Real
 
-Uma plataforma completa de coleta, processamento e análise de dados climáticos em tempo real usando uma arquitetura de microsserviços orientada por eventos.
+Uma plataforma completa de coleta, processamento e análise de dados climáticos usando arquitetura de **microsserviços** orientada por eventos com 6 containers Docker.
 
-## Arquitetura
+---
+
+## 🚀 Início Rápido
+
+### ✅ Pré-requisitos
+- Docker e Docker Compose instalados
+- Git
+
+### 🐳 Rodar Tudo com Docker Compose (Recomendado)
+
+```bash
+# Clone o repositório
+git clone https://github.com/paulo2602/G-CLIMA.git
+cd G-CLIMA
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+
+# Inicie todos os serviços
+docker-compose up -d
+
+# Aguarde ~30 segundos
+sleep 30
+
+# Verifique se tudo está rodando
+docker-compose ps
+```
+
+**Todos os 6 containers devem estar com status UP:**
+- ✅ mongo (MongoDB)
+- ✅ rabbitmq (RabbitMQ)
+- ✅ api (NestJS API)
+- ✅ frontend (React + Vite)
+- ✅ collector (Python)
+- ✅ worker (Go)
+
+---
+
+## 📍 URLs Principais
+
+| Serviço | URL | Acesso |
+|---------|-----|--------|
+| **Frontend** | http://localhost:5173 | admin / admin |
+| **API (REST)** | http://localhost:3000/weather/logs | - |
+| **Swagger** | http://localhost:3000/api | - |
+| **RabbitMQ** | http://localhost:15672 | guest / guest |
+| **MongoDB** | localhost:27017 | root / password |
+
+---
+
+## 👤 Usuário Padrão para Acesso Inicial
+
+```
+Email: admin@clima.ai
+Usuário: admin
+Senha: admin
+```
+
+⚠️ **Altere essas credenciais em produção!**
+
+---
+
+## 📺 Vídeo Explicativo
+
+🎬 **Link do vídeo (YouTube não listado):**
+- Duração: 5 minutos
+- Conteúdo: Arquitetura, pipeline, IA, decisões técnicas e demo
+- Link: [Inserir link do vídeo aqui]
+
+---
+
+## 🏗️ Arquitetura
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                       Frontend (React + Vite)                     │
-│                    Dashboard de Visualização                      │
+│              Dashboard com Dark Mode & Responsivo                │
 └────────────────────────────┬────────────────────────────────────┘
-                             │
+                             │ HTTP/REST
                     ┌────────▼────────┐
                     │   API (NestJS)  │
                     │   Port: 3000    │
@@ -19,412 +90,328 @@ Uma plataforma completa de coleta, processamento e análise de dados climáticos
         │                    │                    │
    ┌────▼────┐         ┌────▼────┐         ┌────▼────┐
    │ MongoDB │         │ RabbitMQ │         │ Weather │
-   │  Port   │         │   Port   │         │  Data   │
-   │  27017  │         │   5672   │         │ Export  │
-   └─────────┘         └────┬────┘         │ (CSV/   │
-                            │              │  XLSX)  │
-                   ┌────────┴────────┐      └────────┘
+   │  Port   │         │ Fila MSG │         │ Export  │
+   │  27017  │         │   5672   │         │CSV/XLSX │
+   └─────────┘         └────┬────┘         └────────┘
+                            │
+                   ┌────────┴────────┐
                    │                 │
             ┌──────▼──────┐    ┌────▼──────┐
             │  Collector  │    │   Worker  │
             │  (Python)   │    │   (Go)    │
-            │  Open-Meteo │    │ Consumer  │
+            │ OpenWeather │    │ Consumer  │
             │   API       │    │  RabbitMQ │
             └─────────────┘    └───────────┘
 ```
 
-## Stack Tecnológico
+---
 
-### Backend
-- **NestJS 10.2.10**: Framework backend Node.js
-- **TypeScript 5.2.2**: Linguagem de programação
-- **MongoDB 7**: Banco de dados NoSQL
-- **Mongoose**: ODM para MongoDB
-- **JWT**: Autenticação e autorização
-- **PassportJS**: Estratégia de autenticação
+## 📦 Componentes do Projeto
 
-### Worker & Collector
-- **Go 1.22**: Linguagem compilada para alta performance
-- **Python 3.12**: Coleta de dados
-- **RabbitMQ 3**: Message broker
+### **Frontend** (React + Vite)
+- 📁 `frontend/`
+- Dashboard responsivo com cards climáticos
+- Dark mode toggle
+- Página Explore com insights
+- Exportação de dados (CSV/XLSX)
+- Autenticação JWT
 
-### Frontend
-- **React 18**: Biblioteca UI
-- **Vite**: Build tool e dev server
-- **Axios**: Cliente HTTP
-- **TanStack React Query**: Gerenciamento de estado
-- **TailwindCSS**: Styling
-
-### DevOps
-- **Docker & Docker Compose**: Containerização e orquestração
-- **Open-Meteo API**: Fonte de dados climáticos gratuita
-
-## Funcionalidades Principais
-
-### 1. Coleta Automática de Dados
-- Coleta dados climáticos a cada 60 minutos (configurável)
-- Integração com API Open-Meteo (gratuita e sem autenticação)
-- Publicação automática em fila RabbitMQ
-- Coordenadas padrão: São Paulo (-23.5505, -46.6333)
-
-### 2. Processamento em Tempo Real
-- Worker Go consome mensagens da fila
-- Enriquecimento de dados
-- Armazenamento em MongoDB
-- Tratamento de erros com retry automático
-
-### 3. API RESTful
-- **GET /weather/logs** - Listar últimos 200 registros
-- **POST /weather/logs** - Criar novo registro
-- **GET /weather/export.csv** - Exportar em CSV
-- **GET /weather/export.xlsx** - Exportar em Excel
-- **GET /weather/insights** - Análise de temperatura
-- **POST /auth/signin** - Login de usuário
-- **POST /auth/signup** - Registro de usuário
-- **GET /users** - Listar usuários (autenticado)
-
-### 4. Dashboard Interativo
-- Visualização de dados em tempo real
-- Gráficos de temperatura
-- Tabela de registros
-- Exportação de relatórios
+### **API Backend** (NestJS)
+- 📁 `api-nest/`
+- 16 endpoints para gerenciamento de dados
 - Autenticação com JWT
+- Validação com Class Validator
+- Cálculo de probabilidade de chuva
+- Geração de insights de IA
 
-## Quick Start
+### **Collector** (Python)
+- 📁 `collector-python/`
+- Coleta de dados OpenWeather a cada 60 minutos
+- Publicação em fila RabbitMQ
+- Configuração de coordenadas (default: São Paulo)
 
-### Opção 1: Instalação Automática (macOS)
+### **Worker** (Go)
+- 📁 `worker-go/`
+- Consumer de mensagens RabbitMQ
+- HTTP POST automático para API
+- Retry com backoff exponencial
+- Processamento paralelo
+
+### **Docker Compose**
+- 📄 `docker-compose.yml`
+- Orquestração de 6 containers
+- Networking interno
+- Volumes persistentes
+
+---
+
+## 🔧 Variáveis de Ambiente
+
+Copie `.env.example` para `.env`:
 
 ```bash
-cd clima-ai-platform
-chmod +x setup.sh
-./setup.sh
+cp .env.example .env
 ```
 
-O script irá:
-1. Instalar Homebrew (se necessário)
-2. Instalar Node.js 18 via nvm
-3. Instalar pnpm
-4. Instalar Go 1.22
-5. Instalar Python 3.12
-6. Instalar Docker e Docker Compose
-7. Instalar NestJS CLI
-8. Compilar todos os serviços
-9. Iniciar Docker Compose
+**Principais variáveis:**
 
-### Opção 2: Instalação Manual
+```env
+# Banco de dados
+MONGODB_ROOT_USERNAME=root
+MONGODB_ROOT_PASSWORD=password
+MONGODB_DB=clima_db
 
-#### 1. Pré-requisitos
-```bash
-# macOS com Homebrew
-brew install node go python@3.12 docker
+# API
+JWT_SECRET=your-secret-key-change-in-production
+NODE_ENV=development
 
-# Linux (Ubuntu/Debian)
-sudo apt-get install -y nodejs npm golang python3.12 docker.io docker-compose
+# Autenticação (padrão)
+ADMIN_USER=admin
+ADMIN_PASSWORD=admin
+
+# APIs Externas
+OPENWEATHER_API_KEY=sua-chave-aqui
+
+# Frontend
+VITE_API_URL=http://localhost:3000
 ```
 
-#### 2. Instalar dependências do projeto
+Consulte `.env.example` para a **lista completa** de todas as variáveis possíveis.
+
+---
+
+## 🐍 Executar Collector Python Localmente
+
 ```bash
-# API NestJS
-cd api-nest
-npm install
-npm run build
+# Navegue até o diretório
+cd collector-python
 
-# Frontend React
-cd ../frontend
-npm install
-npm run build
+# Crie um ambiente virtual
+python -m venv venv
 
-# Collector Python
-cd ../collector-python
-python3.12 -m venv venv
-source venv/bin/activate
+# Ative o ambiente
+source venv/bin/activate  # macOS/Linux
+# ou
+venv\Scripts\activate  # Windows
+
+# Instale as dependências
 pip install -r requirements.txt
 
-# Worker Go
-cd ../worker-go
-go mod download
-```
-
-#### 3. Iniciar serviços
-```bash
-docker-compose up -d
-```
-
-## Desenvolvimento
-
-### API NestJS (Dev Mode)
-```bash
-cd api-nest
-npm run start:dev
-# API disponível em http://localhost:3000
-```
-
-### Frontend React (Dev Mode)
-```bash
-cd frontend
-npm run dev
-# Frontend disponível em http://localhost:5173
-```
-
-### Collector Python (Local)
-```bash
-cd collector-python
-source venv/bin/activate
+# Execute
 python app/main.py
 ```
 
-### Worker Go (Local)
+**O que faz:**
+- ✅ Coleta dados climáticos da OpenWeather API
+- ✅ Publica mensagens na fila RabbitMQ `weather.raw`
+- ✅ Executa a cada 60 minutos (configurável)
+
+---
+
+## 🐹 Executar Worker Go Localmente
+
 ```bash
+# Navegue até o diretório
 cd worker-go
-go run main.go
+
+# Compile
+go build -o worker
+
+# Execute
+./worker
 ```
 
-## Variáveis de Ambiente
+**O que faz:**
+- ✅ Escuta a fila RabbitMQ `weather.raw`
+- ✅ Consome mensagens de dados climáticos
+- ✅ Faz POST para API em `/weather/logs`
+- ✅ Reconecta automaticamente se falhar
 
-### `.env` na raiz do projeto
-```bash
-# MongoDB
-MONGO_URI=mongodb://mongo:27017/clima_db
+---
 
-# RabbitMQ
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-QUEUE_NAME=weather.raw
+## 🔄 Pipeline de Dados
 
-# Collector
-LATITUDE=-23.5505
-LONGITUDE=-46.6333
-INTERVAL_MINUTES=60
-
-# API
-PORT=3000
-JWT_SECRET=your-secret-key-here
-
-# Admin
-ADMIN_EMAIL=admin@clima.ai
-ADMIN_PASSWORD=admin123456
+```
+1. Collector Python
+   ↓ (a cada 60 minutos)
+2. RabbitMQ (fila weather.raw)
+   ↓ (durável, persiste em disco)
+3. Worker Go (consumer)
+   ↓ (POST /weather/logs)
+4. API NestJS
+   ↓ (valida + calcula chuva + timestamps)
+5. MongoDB (persiste)
+   ↓
+6. Frontend React
+   ↓ (GET /weather/logs)
+7. Dashboard (renderiza cards)
 ```
 
-## Endpoints da API
+---
+
+## 🤖 Inteligência Artificial
+
+### 🌧️ Probabilidade de Chuva
+- **66+ codes de clima** mapeados da OpenWeather
+- Conversão para probabilidade (0-95%)
+- **Cores codificadas** no Frontend:
+  - 🟢 Verde: 0-30% (sem chuva/leve)
+  - 🟡 Amarelo: 30-60% (moderada)
+  - 🟠 Laranja: 60-80% (forte)
+  - 🔴 Vermelho: 80-95% (muito forte)
+
+### 🌡️ Análise de Temperatura
+- Análise dos **últimos 48 registros**
+- Calcula **temperatura média**
+- Classifica clima:
+  - ❄️ Frio: ≤18°C
+  - 😊 Agradável: 18-30°C
+  - 🔥 Quente: ≥30°C
+- Gera **resumo narrativo automático**
+
+---
+
+## 📊 API Endpoints Principais
 
 ### Autenticação
 ```
-POST /auth/signin
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-POST /auth/signup
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "User Name",
-  "preferences": {
-    "locations": ["São Paulo"],
-    "units": "celsius",
-    "notifications": true
-  }
-}
+POST   /auth/login         # Fazer login
+POST   /auth/register      # Criar conta nova
 ```
 
 ### Dados Climáticos
 ```
-GET /weather/logs
-GET /weather/logs?limit=50
-
-POST /weather/logs
-{
-  "timestamp": "2024-01-01T12:00:00Z",
-  "temperature": 25.5,
-  "windspeed": 10,
-  "winddirection": 180,
-  "city": "São Paulo"
-}
-
-GET /weather/export.csv
-GET /weather/export.xlsx
-
-GET /weather/insights
+GET    /weather/logs       # Listar todos os dados
+POST   /weather/logs       # Criar novo registro
+GET    /weather/insights   # Insights da IA
+GET    /weather/export.csv # Exportar CSV
+GET    /weather/export.xlsx # Exportar Excel
 ```
 
-## Estrutura de Diretórios
-
+### Usuários
 ```
-clima-ai-platform/
-├── api-nest/                 # API NestJS
-│   ├── src/
-│   │   ├── auth/            # Módulo de autenticação
-│   │   ├── weather/         # Módulo de dados climáticos
-│   │   ├── users/           # Módulo de usuários
-│   │   ├── app.module.ts
-│   │   └── main.ts
-│   ├── package.json
-│   └── Dockerfile
-├── frontend/                 # Frontend React + Vite
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   ├── services/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   ├── package.json
-│   └── Dockerfile
-├── collector-python/         # Coleta de dados climáticos
-│   ├── app/
-│   │   ├── config.py
-│   │   └── main.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── worker-go/               # Worker de processamento
-│   ├── main.go
-│   ├── go.mod
-│   └── Dockerfile
-├── docker-compose.yml       # Orquestração de containers
-├── setup.sh                # Script de setup macOS
-└── README.md              # Este arquivo
+GET    /users              # Listar usuários
+GET    /users/:id          # Detalhes do usuário
 ```
-
-## Monitoramento e Logs
-
-### Ver logs dos serviços
-```bash
-# Todos os serviços
-docker-compose logs -f
-
-# Serviço específico
-docker-compose logs -f api
-docker-compose logs -f collector
-docker-compose logs -f worker
-docker-compose logs -f frontend
-
-# Últimas 100 linhas
-docker-compose logs -f --tail=100 api
-```
-
-### Acessar RabbitMQ Management
-```
-URL: http://localhost:15672
-Usuário: guest
-Senha: guest
-```
-
-### Conectar ao MongoDB
-```bash
-mongosh mongodb://localhost:27017/clima_db
-```
-
-## Troubleshooting
-
-### 1. Erro: "Docker daemon is not running"
-```bash
-# Iniciar Docker Desktop (macOS)
-open /Applications/Docker.app
-```
-
-### 2. Erro: "Port already in use"
-```bash
-# Listar processos usando a porta
-lsof -i :3000
-lsof -i :5173
-
-# Matar processo (macOS)
-kill -9 <PID>
-```
-
-### 3. Erro: "ECONNREFUSED" ao conectar ao MongoDB
-```bash
-# Verificar se MongoDB está rodando
-docker-compose ps
-
-# Reiniciar container
-docker-compose restart mongo
-```
-
-### 4. Collector não está coletando dados
-```bash
-# Verificar logs do collector
-docker-compose logs -f collector
-
-# Verificar fila RabbitMQ
-# Acessar http://localhost:15672
-# Verificar se há mensagens na fila 'weather.raw'
-```
-
-### 5. Worker não está processando mensagens
-```bash
-# Verificar logs do worker
-docker-compose logs -f worker
-
-# Verificar se API está respondendo
-curl http://localhost:3000/health
-```
-
-## Performance e Otimizações
-
-### MongoDB
-- Índices criados automaticamente
-- Timestamps em todos os documentos
-- Limite de 200 registros por query padrão
-
-### RabbitMQ
-- Fila durável `weather.raw`
-- Retry automático em caso de erro
-- TTL de mensagens configurável
-
-### Go Worker
-- Processamento paralelo de mensagens
-- Connection pooling para HTTP
-- Graceful shutdown
-
-### Node.js
-- Cache com React Query
-- Lazy loading de componentes
-- Minification em produção
-
-## Segurança
-
-### Autenticação
-- JWT com expiração de 24 horas
-- Senhas armazenadas com hash (bcrypt)
-- Tokens no header Authorization
-
-### Validação
-- Class Validator para DTOs
-- Sanitização de inputs
-- CORS habilitado para frontend
-
-### Dados Sensíveis
-- JWT_SECRET em variável de ambiente
-- Credenciais RabbitMQ em .env
-- MongoDB URI protegida
-
-## Contribuindo
-
-1. Criar branch: `git checkout -b feature/minha-feature`
-2. Commitar mudanças: `git commit -am 'Add minha-feature'`
-3. Push: `git push origin feature/minha-feature`
-4. Criar Pull Request
-
-## Roadmap
-
-- [ ] Dashboard com gráficos avançados (Chart.js)
-- [ ] Predição de temperatura com ML
-- [ ] Notificações via email/SMS
-- [ ] Multi-região com dados de diferentes cidades
-- [ ] API de webhook para integrações
-- [ ] Planos de subscripção
-- [ ] Mobile app (React Native)
-- [ ] GraphQL API alternative
-
-## Licença
-
-MIT © 2024 Clima AI Platform
-
-## Suporte
-
--  Email: support@clima.ai
--  Issues: [GitHub Issues](https://github.com/clima-ai/platform/issues)
--  Discussões: [GitHub Discussions](https://github.com/clima-ai/platform/discussions)
 
 ---
+
+## 📋 Stack Tecnológico
+
+| Camada | Tecnologia | Versão |
+|--------|-----------|--------|
+| **Frontend** | React + Vite + TypeScript | 18 + 5.2 + 5.2 |
+| **Backend** | NestJS + TypeScript | 10.2.10 + 5.2.2 |
+| **Banco** | MongoDB + Mongoose | 7 + 7.0 |
+| **Message Broker** | RabbitMQ | 3 |
+| **Worker** | Go | 1.22 |
+| **Collector** | Python | 3.12 |
+| **Orquestração** | Docker Compose | v3.9 |
+
+---
+
+## 🧪 Desenvolvimento Local
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev  # Inicia em http://localhost:5173
+```
+
+### API
+```bash
+cd api-nest
+npm install
+npm run start:dev  # Inicia em http://localhost:3000
+```
+
+### Parar todos os serviços
+```bash
+docker-compose down
+```
+
+### Reiniciar do zero
+```bash
+docker-compose down -v  # Remove volumes também
+docker-compose up -d
+```
+
+---
+
+## 📊 Status dos Containers
+
+```bash
+# Ver status
+docker-compose ps
+
+# Ver logs
+docker-compose logs -f api        # API
+docker-compose logs -f collector  # Collector
+docker-compose logs -f worker     # Worker
+
+# Acessar MongoDB
+mongosh mongodb://localhost:27017 -u root -p password
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Frontend não carrega
+```bash
+# Verificar se API está rodando
+curl http://localhost:3000/weather/logs
+
+# Reiniciar frontend
+docker-compose restart frontend
+```
+
+### Worker não consome mensagens
+```bash
+# Ver logs
+docker-compose logs worker
+
+# Reiniciar worker
+docker-compose restart worker
+```
+
+### Sem dados no dashboard
+```bash
+# Forçar coleta do Collector
+docker-compose exec collector python -c "from app.main import collect_weather; collect_weather()"
+
+# Verificar MongoDB
+mongosh mongodb://localhost:27017
+db.weather.find().limit(1).pretty()
+```
+
+---
+
+## 📝 Licença
+
+MIT © 2024 GDASH CLIMA Platform
+
+---
+
+## 🤝 Contribuindo
+
+1. Fork o repositório
+2. Crie uma branch: `git checkout -b feature/sua-feature`
+3. Commit: `git commit -m 'Add sua-feature'`
+4. Push: `git push origin feature/sua-feature`
+5. Abra um Pull Request
+
+---
+
+## 📧 Suporte
+
+- 📋 [Abrir Issue](https://github.com/paulo2602/G-CLIMA/issues)
+- 💬 [Discussões](https://github.com/paulo2602/G-CLIMA/discussions)
+
+---
+
+**Desenvolvido com ❤️ para monitoramento de clima em tempo real**
+
+
 
